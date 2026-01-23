@@ -1,0 +1,36 @@
+# Dependencies (will be installed in container)
+node_modules/
+
+# Build output (will be built in container)
+dist/
+
+# Environment files (should be passed at runtime)
+.env
+.env.*
+!.env.example
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation
+README.md
+LICENSE
+*.md
+
+# Claude
+.claude/
+
+# Logs
+*.log
+npm-debug.log*
