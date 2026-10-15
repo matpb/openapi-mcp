@@ -3,6 +3,7 @@ node_modules/
 
 # Build output (will be built in container)
 dist/
+dist-test/
 
 # Environment files (should be passed at runtime)
 .env

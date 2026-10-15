@@ -19,6 +19,9 @@ import GetEndpointDetailsTool from "./tools/GetEndpointDetailsTool.js";
 import SearchSchemasTool from "./tools/SearchSchemasTool.js";
 import GetSchemaDetailsTool from "./tools/GetSchemaDetailsTool.js";
 import GetOpenAPISpecTool from "./tools/GetOpenAPISpecTool.js";
+import ListGuidesTool from "./tools/ListGuidesTool.js";
+import GetGuideTool from "./tools/GetGuideTool.js";
+import SearchDocsTool from "./tools/SearchDocsTool.js";
 
 // Get the directory of the current module
 const __filename = fileURLToPath(import.meta.url);
@@ -44,6 +47,9 @@ const tools = [
   new SearchSchemasTool(),
   new GetSchemaDetailsTool(),
   new GetOpenAPISpecTool(),
+  new ListGuidesTool(),
+  new GetGuideTool(),
+  new SearchDocsTool(),
 ];
 const toolsMap = new Map(tools.map((t) => [t.name, t]));
 

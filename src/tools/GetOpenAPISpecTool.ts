@@ -9,7 +9,7 @@ interface GetOpenAPISpecInput {
 
 class GetOpenAPISpecTool extends MCPTool<GetOpenAPISpecInput> {
   name = "get_openapi_spec";
-  description = "Return the full OpenAPI spec or a filtered section. Use section to get specific parts (info, paths, components, tags, servers, full). Use pathFilter to filter paths by regex pattern.";
+  description = "Return the full OpenAPI spec or a filtered section. Use section to get specific parts (info, paths, components, tags, servers, full). Use pathFilter to filter paths by regex pattern. Platform guides are tags carrying an x-guide object with an id (a common naming is guide:<id>); use list_guides, get_guide and search_docs to read them instead of dumping the spec.";
 
   schema = {
     section: {
