@@ -13,6 +13,7 @@ services:
       - OPENAPI_SPEC_URL=${OPENAPI_SPEC_URL}
       - OPENAPI_API_KEY=${OPENAPI_API_KEY:-}
       - SPEC_CACHE_TTL=${SPEC_CACHE_TTL:-300}
+      - SPEC_FETCH_TIMEOUT=${SPEC_FETCH_TIMEOUT:-30}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]

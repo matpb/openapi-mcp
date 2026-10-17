@@ -20,6 +20,20 @@ An MCP (Model Context Protocol) server that provides AI assistants with tools to
 | `search_schemas` | Search for schemas/models by name or property |
 | `get_schema_details` | Get full schema definition with resolved references |
 | `get_openapi_spec` | Retrieve the full spec or filtered sections (info, paths, components, etc.) |
+| `list_guides` | List the platform overview and guides, grouped by topic, with id, title and summary |
+| `get_guide` | Get the full markdown of one platform guide (or `overview`) by id |
+| `search_docs` | Search the overview, guides and endpoints (path, operationId, summary, description) to find which one covers a topic |
+
+### Platform guides
+
+The guide tools read guides that the spec carries itself:
+
+- Guides are tags carrying an `x-guide` object with an `id` (a common naming is `guide:<id>`). The object holds `id`, and optionally `group`, `order`, `summary` and `verified_against`. The tag's `description` is the guide's markdown.
+- The overview is `info.description`, exposed as the guide with id `overview` (it is only present when `info.description` is not empty).
+- `list_guides` groups guides as in `x-tagGroups` (falling back to `x-guide.group`). Inside a group, guides are ordered by `x-guide.order`, then by their position. `get_guide` returns one guide by id (with or without the `guide:` prefix), and `search_docs` searches the overview, guides and endpoints (path, operationId, summary, description).
+- `get_openapi_spec` replaces the guide text with a pointer to `get_guide` in `info`, in `tags` (as an `x-note` key) and in the default `full` section (also with `pathFilter`), so the spec stays small. This only applies when the spec has at least one guide; a spec without guides is returned unchanged.
+- `search_docs` splits the query on whitespace; an entry matches when every term appears in it, and ranks first when every term is in its title, id or summary (the overview also matches `overview` and its `info.x-guide` id and summary). A query starting with `guide:` also matches the `guide:<id>` name (`guide:overview`, and also `guide:<x-guide id>` when the spec sets one). Endpoint hits always rank after the overview and guides.
+- For a spec without guides, `list_guides` and `search_docs` guide results are empty (`list_guides` returns no groups; the overview still comes from `info.description` when present), and `get_guide` reports the available ids.
 
 ## Quick Start
 
@@ -56,6 +70,9 @@ OPENAPI_API_KEY=your-api-key
 # Optional: Cache TTL in seconds (default: 300)
 SPEC_CACHE_TTL=300
 
+# Optional: Spec fetch timeout in seconds (default: 30)
+SPEC_FETCH_TIMEOUT=30
+
 # Transport: 'stdio' for local, 'http-stream' for remote (default: stdio)
 MCP_TRANSPORT=stdio
 
@@ -83,6 +100,7 @@ npm start
 | `OPENAPI_SPEC_URL` | Yes | - | URL to the OpenAPI specification (JSON or YAML) |
 | `OPENAPI_API_KEY` | No | - | API key for authenticated spec endpoints (sent as `X-API-Key` header) |
 | `SPEC_CACHE_TTL` | No | `300` | How long to cache the spec in seconds |
+| `SPEC_FETCH_TIMEOUT` | No | `30` | Timeout of the spec fetch in seconds. After a failed refetch the stale cache is served and the next fetch waits min(`SPEC_CACHE_TTL`, 60) seconds |
 | `MCP_TRANSPORT` | No | `stdio` | Transport type: `stdio` or `http-stream` |
 | `MCP_PORT` | No | `8080` | Port for HTTP transport |
 | `API_KEYS` | No | - | Comma-separated API keys for HTTP client authentication |
@@ -267,6 +285,9 @@ npm run build
 
 # Run in development mode
 npm run dev
+
+# Run the tests (compiles to dist-test and runs node --test)
+npm test
 ```
 
 ### Project Structure
@@ -276,12 +297,16 @@ openapi-mcp/
 ├── src/
 │   ├── index.ts           # Server entry point
 │   ├── config.ts          # Environment configuration
+│   ├── __tests__/         # node:test suites (npm test)
 │   ├── tools/             # MCP tool implementations
 │   │   ├── SearchEndpointsTool.ts
 │   │   ├── GetEndpointDetailsTool.ts
 │   │   ├── SearchSchemasTool.ts
 │   │   ├── GetSchemaDetailsTool.ts
-│   │   └── GetOpenAPISpecTool.ts
+│   │   ├── GetOpenAPISpecTool.ts
+│   │   ├── ListGuidesTool.ts
+│   │   ├── GetGuideTool.ts
+│   │   └── SearchDocsTool.ts
 │   └── utils/
 │       ├── OpenAPIManager.ts  # Spec fetching and caching
 │       └── RefResolver.ts     # $ref resolution
@@ -289,6 +314,8 @@ openapi-mcp/
 │   ├── Dockerfile
 │   └── docker-compose.yml
 ├── .env.example
+├── tsconfig.json
+├── tsconfig.test.json # Test build (outDir dist-test)
 └── package.json
 ```
 
